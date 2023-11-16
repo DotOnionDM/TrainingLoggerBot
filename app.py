@@ -29,10 +29,10 @@ def text_handler(message):
 
 
 def main() -> None:
+    bot = telebot.TeleBot(TOKEN)
+    database = 'Logs.db'
     bot.polling()
 
 if __name__ == "__main__":
-    bot = telebot.TeleBot(TOKEN)
-    database = 'Logs.db'
     main()
     
