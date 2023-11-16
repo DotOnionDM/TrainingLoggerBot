@@ -7,8 +7,6 @@ from contextlib import closing
 from telebot import types
 
 TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
-bot = telebot.TeleBot(TOKEN)
-database = 'Logs.db'
 
 @bot.message_handler(commands=['start', 'go'])
 def start_handler(message):
@@ -34,5 +32,7 @@ def main() -> None:
     bot.polling()
 
 if __name__ == "__main__":
+    bot = telebot.TeleBot(TOKEN)
+    database = 'Logs.db'
     main()
     
