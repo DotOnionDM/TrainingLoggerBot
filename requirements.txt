@@ -80,7 +80,6 @@ easydict==1.11
 ecos==2.0.12
 editdistance==0.6.2
 eerepr==0.0.4
-en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0-py3-none-any.whl#sha256=83276fc78a70045627144786b52e1f2728ad5e29e5e43916ec37ea9c26a11212
 entrypoints==0.4
 et-xmlfile==1.1.0
 etils==1.5.2
@@ -134,7 +133,6 @@ google-cloud-language==2.9.1
 google-cloud-resource-manager==1.10.4
 google-cloud-storage==2.8.0
 google-cloud-translate==3.11.3
-google-colab @ file:///colabtools/dist/google-colab-1.0.0.tar.gz#sha256=d70e8e3271f6645598e432bb876b85a3f3efa4dfd6c50dd02e11ae30ce8fd696
 google-crc32c==1.5.0
 google-pasta==0.2.0
 google-resumable-media==2.6.0
@@ -183,7 +181,6 @@ ipytree==0.2.2
 ipywidgets==7.7.1
 itsdangerous==2.1.2
 jax==0.4.20
-jaxlib @ https://storage.googleapis.com/jax-releases/cuda11/jaxlib-0.4.20+cuda11.cudnn86-cp310-cp310-manylinux2014_x86_64.whl#sha256=01be66238133f884bf5adf15cd7eaaf8445f9d4b056c5c64df28a997a6aff2fe
 jeepney==0.7.1
 jieba==0.42.1
 Jinja2==3.1.2
