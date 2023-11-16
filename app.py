@@ -7,7 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1n9YaFXw1gNuEwsFVURVqvniQhltG_B6-
 """
 
-pip install -r requirements.txt
 
 import telebot
 from telebot import types
