@@ -13,6 +13,7 @@ import telebot
 from telebot import types
 
 TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
+bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start', 'go'])
 def start_handler(message):
@@ -26,7 +27,6 @@ def text_handler(message):
 
 
 def main() -> None:
-    bot = telebot.TeleBot(TOKEN)
     bot.polling()
 
 if __name__ == "__main__":
