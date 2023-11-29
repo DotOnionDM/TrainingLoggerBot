@@ -6,6 +6,21 @@ import base64
 from contextlib import closing
 from telebot import types
 import random
+import socket
+
+PORT = 8080
+
+def server():
+    sock = socket.socket()
+    data = ""
+    sock.bind(('127.0.0.1', PORT))
+    while data != "fin":
+        sock.listen(1)
+        conn, addr = sock.accept()
+        print("Connected: ", addr)
+        data = conn.recv(1024).decode()
+        conn.close()
+    sock.close()
 
 TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
 database = 'Logs.db'
@@ -27,7 +42,7 @@ def start_handler(message):
     button_meme = types.KeyboardButton("Хочу мем с попугаем")
     markup.add(button_meme)
 
-    bot.send_message(message.chat.id, "Привет, {0.first_name}!", f'Я бот - логгер процесса обучения нейросетей. Тебе присвоен уникальный id: {unique_id}.', reply_markup = markup)
+    bot.send_message(message.chat.id, f"Привет, {message.chat.first_name}! Я бот - логгер процесса обучения нейросетей. Тебе присвоен уникальный id: {unique_id}.", reply_markup = markup)
 
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
@@ -58,5 +73,10 @@ def text_handler(message):
 def main() -> None:
     bot.polling()
 
+from multiprocessing import Process
+
 if __name__ == "__main__":
+    server_proc = Process(target=server)
+    server_proc.start()
     main()
+    server_proc.join()
