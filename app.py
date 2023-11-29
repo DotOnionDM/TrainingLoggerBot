@@ -11,16 +11,7 @@ import socket
 PORT = 80
 
 def server():
-    sock = socket.socket()
-    data = ""
-    sock.bind(('', PORT))
-    while data != "fin":
-        sock.listen(1)
-        conn, addr = sock.accept()
-        print("Connected: ", addr)
-        data = conn.recv(1024).decode()
-        conn.close()
-    sock.close()
+    print(1)
 
 TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
 database = 'Logs.db'
