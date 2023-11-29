@@ -8,12 +8,12 @@ from telebot import types
 import random
 import socket
 
-PORT = 80
+PORT = 8080
 
 def server():
     sock = socket.socket()
     data = ""
-    sock.bind(('127.0.0.1', PORT))
+    sock.bind(('', PORT))
     while data != "fin":
         sock.listen(1)
         conn, addr = sock.accept()
