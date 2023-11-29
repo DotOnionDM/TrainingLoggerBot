@@ -6,12 +6,6 @@ import base64
 from contextlib import closing
 from telebot import types
 import random
-import socket
-
-PORT = 80
-
-def server():
-    print(1)
 
 TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
 database = 'Logs.db'
@@ -64,10 +58,5 @@ def text_handler(message):
 def main() -> None:
     bot.polling()
 
-from multiprocessing import Process
-
 if __name__ == "__main__":
-    server_proc = Process(target=server)
-    server_proc.start()
     main()
-    server_proc.join()
