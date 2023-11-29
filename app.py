@@ -8,7 +8,7 @@ from telebot import types
 import random
 import socket
 
-PORT = 8080
+PORT = 80
 
 def server():
     sock = socket.socket()
