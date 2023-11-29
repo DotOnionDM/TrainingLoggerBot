@@ -5,6 +5,7 @@ from sqlite3 import Error
 import base64
 from contextlib import closing
 from telebot import types
+import random
 
 TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
 database = 'Logs.db'
@@ -21,13 +22,37 @@ def start_handler(message):
     connection.execute(query_insert_user_id)
     connection.commit()
     connection.close()
-    bot.send_message(message.chat.id, f'Привет, я бот - логгер процесса обучения нейросетей. Тебе присвоен уникальный id: {unique_id}.')
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    button_meme = types.KeyboardButton("Хочу мем с попугаем")
+    markup.add(button_meme)
+
+    bot.send_message(message.chat.id, "Привет, {0.first_name}!", f'Я бот - логгер процесса обучения нейросетей. Тебе присвоен уникальный id: {unique_id}.', reply_markup = markup)
 
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
     text = message.text.lower()
     chat_id = message.chat.id
-    bot.send_message(chat_id, 'Привет, я бот - логгер обучения нейросетей. Пока я ничего не умею, но это скоро изменится!')
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    button_meme = types.KeyboardButton("Хочу мем с попугаем")
+    markup.add(button_meme)
+    
+    if text == "хочу мем с попугаем":
+        number_meme = random.randint(0, 3)
+        connection = sqlite3.connect(database)
+        our_cursor = connection.cursor()
+        query_get_meme = f'''
+        SELECT meme_link FROM images
+        WHERE id = "{number_meme}"
+        '''
+        our_cursor.execute(query_get_meme)
+        result = our_cursor.fetchone()
+        if result:
+            bot.send_photo(chat_id, result[0], reply_markup = markup)
+
+    else:
+        bot.send_message(chat_id, 'Привет, я бот - логгер обучения нейросетей. Пока я ничего не умею, но это скоро изменится!', reply_markup = markup)
 
 
 def main() -> None:
