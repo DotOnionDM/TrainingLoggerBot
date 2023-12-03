@@ -9,6 +9,7 @@ import asyncio
 import tornado
 import tornado.web
 import random
+import json
 
 TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
 database = 'Logs.db'
@@ -53,6 +54,7 @@ async def text_handler(message: types.Message):
         '''
         our_cursor.execute(query_get_meme)
         result = our_cursor.fetchone()
+        connection.close()
         if result:
             await bot.send_photo(chat_id, result[0], reply_markup = markup)
 
@@ -63,7 +65,33 @@ async def text_handler(message: types.Message):
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("Hello, world")
+        self.send_error(status_code=405)
+    
+    def post(self):
+        data = json.loads(self.request.body)
+        if (data["type"] == "SELECT") and (data["what"] == "train_id"):
+            query_get_train_id = f'''
+            SELECT train_id FROM status_table
+            WHERE user_id = "{data["user_id"]}"
+            '''
+            connection = sqlite3.connect(database)
+            cursor = connection.cursor()
+            cursor.execute(query_get_train_id)
+            result = cursor.fetchall()
+            connection.close()
+            self.write(result[-1][0])
+        elif(data["type"] == "INSERT") and (data["what"] == "train_status"):
+            query_insert_train = f'''
+            INSERT INTO status_table(train_id, user_id, train_status, time_start, time_end)
+            VALUES ("{data["train_id"]}", "{data["user_id"]}", "{data["train_status"]}", "{data["time_start"]}", "{data["time_end"]}")
+            '''
+            connection = sqlite3.connect(database)
+            cursor = connection.cursor()
+            cursor.execute(query_insert_train)
+            connection.commit()
+            connection.close()
+            self.write("Updated successfully")
+    
 
 def make_app():
     return tornado.web.Application([
@@ -72,7 +100,7 @@ def make_app():
 
 async def main():
     app = make_app()
-    app.listen(80)
+    app.listen(8080) # Cменить на 80 при загрузке на хостинг
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
