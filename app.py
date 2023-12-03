@@ -90,7 +90,21 @@ class MainHandler(tornado.web.RequestHandler):
             cursor.execute(query_insert_train)
             connection.commit()
             connection.close()
-            self.write("Updated successfully")
+            self.write("Train created")
+        elif(data["type"] == "UPDATE") and (data["what"] == "train_status"):
+            query_update_train = f'''
+            UPDATE status_table 
+            SET time_end = "{data["time_end"]}", train_status = "{data["train_status"]}" 
+            WHERE user_id = "{data["user_id"]}" AND train_id = "{data["train_id"]}"
+            '''
+            connection = sqlite3.connect(database)
+            cursor = connection.cursor()
+            cursor.execute(query_update_train)
+            connection.commit()
+            connection.close()
+            self.write("Train ended")
+        else:
+            self.send_error(status_code=503)
     
 
 def make_app():
