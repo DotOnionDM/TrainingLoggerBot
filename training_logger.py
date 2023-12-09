@@ -6,8 +6,8 @@ import base64
 import datetime
 import time
 
-# URL = "https://tgloggerbot-hellcat.amvera.io/" # - раскомментить при загрузке на хостинг
-URL = "http://localhost:8080/" # - закомментить при загрузке на хостинг
+URL = "https://tgloggerbot-hellcat.amvera.io/" # - раскомментить при загрузке на хостинг
+#URL = "http://localhost:8080/" # - закомментить при загрузке на хостинг
 
 def post_request(data):
     http_client = HTTPClient()
@@ -40,6 +40,18 @@ class Train:
     def __init__(self, user_id) -> None:
         self.train_id = None
         self.time_start = None
+        '''data = {
+            "type": "SELECT",
+            "what": "user_id",
+            "user_id": user_id
+        }
+        prepared = json.dumps(data)
+        response = post_request(prepared)
+        if response == "ok":
+            self.user_id = user_id
+        else:
+            self.user_id = None
+            raise RuntimeError(response)'''
         self.user_id = user_id
     
     def create_train(self) -> str:

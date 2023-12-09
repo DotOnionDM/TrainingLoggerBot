@@ -70,7 +70,22 @@ class MainHandler(tornado.web.RequestHandler):
     def post(self):
         data = json.loads(self.request.body)
         try:
-            if (data["type"] == "SELECT") and (data["what"] == "train_id"):
+            if (data["type"] == "SELECT") and (data["what"] == "user_id"):
+                query_get_user_id = f'''
+                SELECT user_id FROM chat_user_table
+                WHERE user_id = "{data["user_id"]}"
+                '''
+                connection = sqlite3.connect(database)
+                cursor = connection.cursor()
+                cursor.execute(query_get_user_id)
+                result = cursor.fetchone()
+                connection.close()
+                if not result:
+                    print(result)
+                    self.write("User not found")
+                else:
+                    self.write("ok")
+            elif (data["type"] == "SELECT") and (data["what"] == "train_id"):
                 query_get_train_id = f'''
                 SELECT train_id FROM status_table
                 WHERE user_id = "{data["user_id"]}"
@@ -145,7 +160,7 @@ def make_app():
 
 async def main():
     app = make_app()
-    app.listen(8080) # Cменить на 80 при загрузке на хостинг
+    app.listen(80) # Cменить на 80 при загрузке на хостинг
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
