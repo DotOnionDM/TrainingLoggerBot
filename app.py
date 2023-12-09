@@ -161,7 +161,8 @@ def make_app():
 async def main():
     app = make_app()
     app.listen(80) # Cменить на 80 при загрузке на хостинг
-    await dp.start_polling(bot)
+    #await dp.start_polling(bot)
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
     asyncio.run(main())
