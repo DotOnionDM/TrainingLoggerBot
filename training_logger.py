@@ -75,9 +75,7 @@ class Train:
             "time": metric_time
         }
         prepared = json.dumps(data)
-        response = post_request(prepared)
-        self.train_id = new_id
-        print(response)
+        post_request(prepared)
 
     def end_train(self):
         if self.train_id is None:
