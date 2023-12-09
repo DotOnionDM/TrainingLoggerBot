@@ -86,20 +86,6 @@ class MainHandler(tornado.web.RequestHandler):
                     self.write("User not found")
                 else:
                     self.write("ok")
-            elif (data["type"] == "SELECT") and (data["what"] == "train_id"):
-                query_get_train_id = f'''
-                SELECT train_id FROM status_table
-                WHERE user_id = "{data["user_id"]}"
-                '''
-                connection = sqlite3.connect(database)
-                cursor = connection.cursor()
-                cursor.execute(query_get_train_id)
-                result = cursor.fetchall()
-                connection.close()
-                if not result:
-                    self.write("Trains not found")
-                else:
-                    self.write(result[-1][0])
             elif (data["type"] == "INSERT") and (data["what"] == "train_status"):
                 query_insert_train = f'''
                 INSERT INTO status_table(train_id, user_id, train_status, time_start, time_end)
@@ -123,20 +109,6 @@ class MainHandler(tornado.web.RequestHandler):
                 connection.commit()
                 connection.close()
                 self.write("Train ended")
-            elif (data["type"] == "SELECT") and (data["what"] == "log_id"):
-                query_get_log_id = f'''
-                SELECT log_id FROM logs_table
-                WHERE user_id = "{data["user_id"]}" AND train_id = "{data["train_id"]}"
-                '''
-                connection = sqlite3.connect(database)
-                cursor = connection.cursor()
-                cursor.execute(query_get_log_id)
-                result = cursor.fetchall()
-                connection.close()
-                if not result:
-                    self.write("Log not found")
-                else:
-                    self.write(result[-1][0])
             elif (data["type"] == "INSERT") and (data["what"] == "logs_table"):
                 query_insert_log = f'''
                 INSERT INTO logs_table(log_id, user_id, train_id, epoch, metric_type, metric_score, time)
