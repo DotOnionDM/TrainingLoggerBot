@@ -54,14 +54,17 @@ class Train:
             raise RuntimeError(response)'''
         self.user_id = user_id
     
-    def create_train(self) -> str:
+    def create_train(self, train_id = None) -> str:
         if self.train_id is not None:
             raise RuntimeError("Train is already created.")
-        last_id = get_last_train_id(self.user_id)
-        try:
-            new_id = str(int(last_id) + 1)
-        except ValueError:
-            new_id = '0'
+        if train_id is None:
+            last_id = get_last_train_id(self.user_id)
+            try:
+                new_id = str(int(last_id) + 1)
+            except ValueError:
+                new_id = '0'
+        else:
+            new_id = train_id
         self.time_start = str(datetime.datetime.now())
         data = {
             "type": "INSERT",
