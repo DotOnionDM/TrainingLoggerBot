@@ -25,6 +25,17 @@ def get_last_train_id(user_id : str) -> str:
     response = post_request(prepared)
     return response
 
+def get_last_log_id(user_id : str, train_id : str) -> str:
+    data = {
+        "type": "SELECT",
+        "what": "log_id",
+        "user_id": user_id,
+        "train_id": train_id
+    }
+    prepared = json.dumps(data)
+    response = post_request(prepared)
+    return response
+
 class Train:
     def __init__(self, user_id) -> None:
         self.train_id = None
@@ -55,12 +66,34 @@ class Train:
         print(response)
         return new_id
 
-    def send_metrics():
-        pass
+    def send_metrics(self, epoch : int, metric_type : str, metric_score : float):
+        if self.train_id is None:
+            raise RuntimeError("Train was not created")
+        last_id = get_last_log_id(self.user_id, self.train_id)
+        try:
+            new_id = str(int(last_id) + 1)
+        except ValueError:
+            new_id = '0'
+        metric_time = str(datetime.datetime.now())
+        data = {
+            "type": "INSERT",
+            "what": "logs_table",
+            "log_id": new_id,
+            "user_id": self.user_id,
+            "train_id": self.train_id,
+            "epoch": epoch,
+            "metric_type": metric_type,
+            "metric_score": metric_score,
+            "time": metric_time
+        }
+        prepared = json.dumps(data)
+        response = post_request(prepared)
+        self.train_id = new_id
+        print(response)
 
     def end_train(self):
         if self.train_id is None:
-            raise RuntimeError("Train not created.")
+            raise RuntimeError("Train was not created.")
         time_end = str(datetime.datetime.now())
         data = {
             "type": "UPDATE",
