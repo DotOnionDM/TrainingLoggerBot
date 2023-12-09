@@ -12,7 +12,7 @@ import random
 import json
 
 TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
-database = 'Logs.db'
+database = 'data/Logs.db'
 
 # MAKE BOT
 storage = MemoryStorage()
