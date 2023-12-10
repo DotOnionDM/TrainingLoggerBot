@@ -5,13 +5,17 @@ from contextlib import closing
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import FSInputFile
 import asyncio
 import tornado
 import tornado.web
 import random
 import json
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
-TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
+TOKEN = "TOKEN"
 database = '/data/Logs.db'
 #database = 'Logs.db'
 
@@ -33,9 +37,52 @@ async def start_handler(message: types.Message):
     connection.close()
 
     button_meme = types.KeyboardButton(text="Хочу мем с попугаем")
-    markup = types.ReplyKeyboardMarkup(keyboard=[[button_meme]], resize_keyboard=True)
+    button_graph = types.KeyboardButton(text="Хочу график обучения")
+    markup = types.ReplyKeyboardMarkup(keyboard=[[button_meme, button_graph]], resize_keyboard=True)
 
     await bot.send_message(message.chat.id, f"Привет, {message.chat.first_name}! Я бот - логгер процесса обучения нейросетей. Тебе присвоен уникальный id: {unique_id}.", reply_markup = markup)
+
+@dp.message(F.text.startswith('Обучение: '))
+async def plot_training(message: types.Message):
+    text = message.text.lower()
+    text = text[10:]
+    chat_id = message.chat.id
+
+    connection = sqlite3.connect(database)
+
+    query_get_info = pd.read_sql_query(f'''
+        SELECT * FROM logs_table
+        WHERE train_id = "{text}"
+        ''', connection)
+
+    data = pd.DataFrame(query_get_info, columns = ['log_id', 'user_id', 'train_id', 'epoch', 'metric_type', 'metric_score', 'time'])
+    connection.close()
+
+    button_meme = types.KeyboardButton(text="Хочу мем с попугаем")
+    button_graph = types.KeyboardButton(text="Хочу график обучения")
+    markup = types.ReplyKeyboardMarkup(keyboard=[[button_meme, button_graph]], resize_keyboard=True)
+
+    if data.empty:
+        await bot.send_message(chat_id, 'Что-то пошло не так. Может, опечатка в названии модели? Попробуй еще раз!', reply_markup = markup)
+    else:
+        data.sort_values(by = ['epoch'])
+        x = data['epoch'].to_numpy()
+        y = data['metric_score'].to_numpy()
+        fig, ax = plt.subplots(nrows = 1, ncols = 1)
+        ax.plot(x, y)
+        ax.grid()
+        title = "График зависимости " + data['metric_type'][0] + " от эпохи"
+        plt.title(title)
+        plt.xlabel("Эпоха")
+        ylabel = "Значение " + data['metric_type'][0]
+        plt.ylabel(ylabel)
+        plt.xticks(np.arange(min(x), max(x) + 1, 1))
+        plt.savefig('figure.png')
+        await bot.send_message(chat_id, 'Лови!', reply_markup = markup)
+        figure = FSInputFile("figure.png")
+        await bot.send_document(message.chat.id, figure, reply_markup = markup)
+        plt.close(fig)
+
 
 @dp.message(F.content_type.in_({'text'}))
 async def text_handler(message: types.Message):
@@ -43,7 +90,8 @@ async def text_handler(message: types.Message):
     chat_id = message.chat.id
 
     button_meme = types.KeyboardButton(text="Хочу мем с попугаем")
-    markup = types.ReplyKeyboardMarkup(keyboard=[[button_meme]], resize_keyboard=True)
+    button_graph = types.KeyboardButton(text="Хочу график обучения")
+    markup = types.ReplyKeyboardMarkup(keyboard=[[button_meme, button_graph]], resize_keyboard=True)
     
     if text == "хочу мем с попугаем":
         number_meme = random.randint(0, 3)
@@ -59,8 +107,11 @@ async def text_handler(message: types.Message):
         if result:
             await bot.send_photo(chat_id, result[0], reply_markup = markup)
 
+    elif text == "хочу график обучения":
+        await bot.send_message(chat_id, 'Пожалуйста, отправь название модели, которое было придумано в начале обучения в формате "Обучение: train_id" без кавычек (слово "Обучение" с большой буквы), где train_id – название модели', reply_markup = markup)
+
     else:
-        await bot.send_message(chat_id, 'Привет, я бот - логгер обучения нейросетей. Пока я ничего не умею, но это скоро изменится!', reply_markup = markup)
+        await bot.send_message(chat_id, 'К сожалению, я не понимаю, что нужно сделать :(', reply_markup = markup)
 
 
 
