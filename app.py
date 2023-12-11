@@ -15,7 +15,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-TOKEN = "TOKEN"
+TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
 database = '/data/Logs.db'
 #database = 'Logs.db'
 
