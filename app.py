@@ -19,10 +19,10 @@ import seaborn as sns
 import datetime
 from gigachat import GigaChat
 
-TOKEN = "TOKEN"
+TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
 GIGACHAT_TOKEN = "MDUxZjY4ODAtNDExZi00YmU4LWFjMzctZGU3YmQyZTVkNWIzOjRmNjIyMzkwLWYzZGUtNDNlZi05NjIwLTA0MmZhZmE5M2FmZg=="
-database = '/data/Logs.db'
-#database = 'Logs.db'
+#database = '/data/Logs.db'
+database = 'Logs.db'
 
 storage = MemoryStorage()
 bot = Bot(token=TOKEN)
@@ -258,14 +258,19 @@ class MainHandler(tornado.web.RequestHandler):
                 result = cursor.fetchone()
                 connection.close()
                 if not result:
-                    print(result)
-                    self.write("User not found")
+                    self.send_error(status_code=404)
                 else:
-                    self.write("ok")
+                    self.set_status(status_code=200)
             elif (data["type"] == "INSERT") and (data["what"] == "train_status"):
+                try:
+                    num = int(data["num_epochs"])
+                except TypeError:
+                    self.send_error(403)
                 query_insert_train = f'''
-                INSERT INTO status_table(train_id, user_id, train_status, time_start, time_end)
-                VALUES ("{data["train_id"]}", "{data["user_id"]}", "{data["train_status"]}", "{data["time_start"]}", "{data["time_end"]}")
+                INSERT INTO status_table(train_id, user_id, num_epochs, train_status, time_start, time_end)
+                VALUES ("{data["train_id"]}", "{data["user_id"]}",
+                {data["num_epochs"]}, "{data["train_status"]}",
+                "{data["time_start"]}", "{data["time_end"]}")
                 '''
                 connection = sqlite3.connect(database)
                 cursor = connection.cursor()
@@ -274,6 +279,10 @@ class MainHandler(tornado.web.RequestHandler):
                 connection.close()
                 self.write("Train created")
             elif (data["type"] == "UPDATE") and (data["what"] == "train_status"):
+                try:
+                    num = int(data["num_epochs"])
+                except TypeError:
+                    self.send_error(403)
                 query_update_train = f'''
                 UPDATE status_table
                 SET time_end = "{data["time_end"]}", train_status = "{data["train_status"]}"
@@ -286,9 +295,15 @@ class MainHandler(tornado.web.RequestHandler):
                 connection.close()
                 self.write("Train ended")
             elif (data["type"] == "INSERT") and (data["what"] == "logs_table"):
+                try:
+                    num = int(data["epoch"])
+                except TypeError:
+                    self.send_error(403)
                 query_insert_log = f'''
                 INSERT INTO logs_table(log_id, user_id, train_id, epoch, metric_type, metric_score, time)
-                VALUES ("{data["log_id"]}", "{data["user_id"]}", "{data["train_id"]}", {data["epoch"]}, "{data["metric_type"]}", {data["metric_score"]}, "{data["time"]}")
+                VALUES ("{data["log_id"]}", "{data["user_id"]}",
+                "{data["train_id"]}", {data["epoch"]}, "{data["metric_type"]}",
+                {data["metric_score"]}, "{data["time"]}")
                 '''
                 connection = sqlite3.connect(database)
                 cursor = connection.cursor()

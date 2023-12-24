@@ -6,32 +6,32 @@ import base64
 import datetime
 import time
 
-URL = "https://tgloggerbot-hellcat.amvera.io/" # - раскомментить при загрузке на хостинг
-#URL = "http://localhost:8080/" # - закомментить при загрузке на хостинг
+#URL = "https://tgloggerbot-hellcat.amvera.io/" # - раскомментить при загрузке на хостинг
+URL = "http://localhost:8080/" # - закомментить при загрузке на хостинг
 
 def post_request(data):
     response = requests.post(URL, data=data)
+    if response.status_code != 200:
+        raise RuntimeError(f"Response status is {response.status_code}!")
+        exit(1)
     return response.text
 
 class Train:
-    def __init__(self, user_id) -> None:
+    def __init__(self, user_id: str) -> None:
         self.train_id = None
+        self.num_epochs = None
         self.time_start = None
-        '''data = {
+        data = {
             "type": "SELECT",
             "what": "user_id",
             "user_id": user_id
         }
         prepared = json.dumps(data)
-        response = post_request(prepared)
-        if response == "ok":
-            self.user_id = user_id
-        else:
-            self.user_id = None
-            raise RuntimeError(response)'''
+        post_request(prepared)
+        self.user_id = user_id
         self.user_id = user_id
     
-    def create_train(self, train_id = None) -> str:
+    def create_train(self, train_id: str = None, num_epochs: int = None) -> str:
         if self.train_id is not None:
             raise RuntimeError("Train is already created.")
         
@@ -46,6 +46,7 @@ class Train:
             "what": "train_status",
             "train_id": new_id,
             "user_id": self.user_id,
+            "num_epochs": num_epochs,
             "train_status": "InProgress",
             "time_start": self.time_start,
             "time_end": "-"
@@ -53,6 +54,7 @@ class Train:
         prepared = json.dumps(data)
         response = post_request(prepared)
         self.train_id = new_id
+        self.num_epochs = num_epochs
         print(response)
         return new_id
 
@@ -86,6 +88,7 @@ class Train:
             "what": "train_status",
             "train_id": self.train_id,
             "user_id": self.user_id,
+            "num_epochs": self.num_epochs,
             "train_status": "Finished",
             "time_start": self.time_start,
             "time_end": time_end
