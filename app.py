@@ -19,10 +19,15 @@ import seaborn as sns
 import datetime
 from gigachat import GigaChat
 
-TOKEN = "6741560844:AAGbM3Edwx-92LPynYdBSPU_JXGwT90ct3w"
-GIGACHAT_TOKEN = "MDUxZjY4ODAtNDExZi00YmU4LWFjMzctZGU3YmQyZTVkNWIzOjRmNjIyMzkwLWYzZGUtNDNlZi05NjIwLTA0MmZhZmE5M2FmZg=="
-#database = '/data/Logs.db'
-database = 'Logs.db'
+with open("config.dat", "r") as dat:
+    data = dat.read()
+    bot_token = data.split("\n")[0]
+    giga_token = data.split("\n")[1]
+    
+TOKEN = bot_token
+GIGACHAT_TOKEN = giga_token
+database = '/data/Logs.db'
+#database = 'Logs.db'
 
 storage = MemoryStorage()
 bot = Bot(token=TOKEN)

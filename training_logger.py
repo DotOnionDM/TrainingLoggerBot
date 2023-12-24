@@ -6,8 +6,8 @@ import base64
 import datetime
 import time
 
-#URL = "https://tgloggerbot-hellcat.amvera.io/" # - раскомментить при загрузке на хостинг
-URL = "http://localhost:8080/" # - закомментить при загрузке на хостинг
+URL = "https://tgloggerbot-hellcat.amvera.io/" # - раскомментить при загрузке на хостинг
+#URL = "http://localhost:8080/" # - закомментить при загрузке на хостинг
 
 def post_request(data):
     response = requests.post(URL, data=data)
