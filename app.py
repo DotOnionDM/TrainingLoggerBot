@@ -65,16 +65,26 @@ def stat_one_markup():
 
 @dp.message(Command("start", "go"))
 async def start_handler(message: types.Message):
-    unique_id = str(uuid.uuid4())
-    query_insert_user_id = f'''
-    INSERT INTO chat_user_table(chat_id, user_id)
-    VALUES ("{message.chat.id}", "{unique_id}")
-    '''
+    print(message.chat.id)
     connection = sqlite3.connect(database)
-    connection.execute(query_insert_user_id)
-    connection.commit()
-    connection.close()
+    query_find_user_id = f'''
+    SELECT user_id FROM chat_user_table
+    WHERE chat_id = "{message.chat.id}"
+    '''
+    unique_id = connection.execute(query_find_user_id).fetchone()[0]
+    print(unique_id)
 
+    if unique_id is None:
+        print("if")
+        unique_id = str(uuid.uuid4())
+        query_insert_user_id = f'''
+        INSERT INTO chat_user_table(chat_id, user_id)
+        VALUES ("{message.chat.id}", "{unique_id}")
+        '''
+        connection.execute(query_insert_user_id)
+        connection.commit()
+
+    connection.close()
     await bot.send_message(message.chat.id,
                            f"Привет, {message.chat.first_name}! Я бот - логгер процесса обучения нейросетей. "
                            f"Тебе присвоен уникальный id: {unique_id}.",
