@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 TOKEN = "TOKEN"
+GIGACHAT_TOKEN = "MDUxZjY4ODAtNDExZi00YmU4LWFjMzctZGU3YmQyZTVkNWIzOjRmNjIyMzkwLWYzZGUtNDNlZi05NjIwLTA0MmZhZmE5M2FmZg=="
 database = '/data/Logs.db'
 #database = 'Logs.db'
 
@@ -111,7 +112,11 @@ async def text_handler(message: types.Message):
         await bot.send_message(chat_id, 'Пожалуйста, отправь название модели, которое было придумано в начале обучения в формате "Обучение: train_id" без кавычек (слово "Обучение" с большой буквы), где train_id – название модели', reply_markup = markup)
 
     else:
-        await bot.send_message(chat_id, 'К сожалению, я не понимаю, что нужно сделать :(', reply_markup = markup)
+        with GigaChat(credentials=GIGACHAT_TOKEN, verify_ssl_certs=False) as giga:
+            response = giga.chat(f"Ты - бот-ассистент в программе, которая помогает пользователям записывать результаты обучения нейросетей и отвечать на другие вопросы пользователя. Пользователь задает тебе вопрос: {text}")
+        ans = response.choices[0].message.content
+        ans += "\n \nДанное сообщение было сгенерировано Gigachat"
+        await bot.send_message(chat_id, ans, reply_markup = markup)
 
 
 
