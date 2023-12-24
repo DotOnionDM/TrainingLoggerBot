@@ -44,7 +44,7 @@ dp = Dispatcher()
 async def start_handler(message: types.Message):
     unique_id = str(uuid.uuid4())
     query_insert_user_id = f'''
-    INSERT INTO users(unique_user_id)
+    INSERT INTO chat_user_table(unique_user_id)
     VALUES ("{unique_id}")
     '''
     connection = sqlite3.connect(database)
