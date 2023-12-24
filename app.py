@@ -19,7 +19,7 @@ import seaborn as sns
 import datetime
 from gigachat import GigaChat
 
-AMVERA_MODE = False
+AMVERA_MODE = True
 if AMVERA_MODE:
     path = "/data/config.dat"
     db_path = "/data/Logs.db"
