@@ -114,7 +114,7 @@ async def plot_training(message: types.Message):
         await bot.send_document(message.chat.id, figure, reply_markup = stat_one_markup())
 
 @dp.message(F.text.startswith('Время до конца обучения: '))
-async def plot_training(message: types.Message):
+async def time_training(message: types.Message):
     text = message.text.lower()
     text = text[25:]
     chat_id = message.chat.id
@@ -165,7 +165,7 @@ async def plot_training(message: types.Message):
 
 
 @dp.message(F.text.startswith('Хочу уведомление о '))
-async def plot_training(message: types.Message):
+async def notification_training(message: types.Message):
     text = message.text.lower()
     text = text[19:]
     chat_id = message.chat.id
@@ -208,7 +208,7 @@ async def plot_training(message: types.Message):
 
 
 @dp.message(F.text.startswith('Отчет: '))
-async def plot_training(message: types.Message):
+async def statistic_training(message: types.Message):
     text = message.text.lower()
     text = text[7:]
     chat_id = message.chat.id
