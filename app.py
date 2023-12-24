@@ -19,15 +19,22 @@ import seaborn as sns
 import datetime
 from gigachat import GigaChat
 
-with open("config.dat", "r") as dat:
+AMVERA_MODE = False
+if AMVERA_MODE:
+    path = "/data/config.dat"
+    db_path = "/data/Logs.db"
+else:
+    path = "config.dat"
+    db_path = "Logs.db"
+
+with open(path, "r") as dat:
     data = dat.read()
     bot_token = data.split("\n")[0]
     giga_token = data.split("\n")[1]
     
 TOKEN = bot_token
 GIGACHAT_TOKEN = giga_token
-database = '/data/Logs.db'
-#database = 'Logs.db'
+database = db_path
 
 storage = MemoryStorage()
 bot = Bot(token=TOKEN)
