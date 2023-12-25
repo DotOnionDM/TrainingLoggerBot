@@ -75,6 +75,12 @@ async def start_handler(message: types.Message):
                            f"Тебе присвоен уникальный id: {user_id[0]}.",
                            reply_markup=main_markup())
 
+    helping = FSInputFile("loggerbot.jpg")
+    await bot.send_photo(message.chat.id, photo=helping, caption='Лови инструкцию!\n', reply_markup=main_markup())
+
+    module = FSInputFile("training_logger.py")
+    await bot.send_document(message.chat.id, document=module, caption="Модуль для работы с ботом!")
+
 
 @dp.message(F.text.startswith('ID: '))
 async def all_statistics(message: types.Message):
@@ -289,7 +295,8 @@ async def text_handler(message: types.Message):
             await bot.send_photo(chat_id, meme[0], reply_markup=main_markup())
 
     elif text == "хочу инструкцию":
-        await bot.send_message(chat_id, 'Лови инструкцию!\n', reply_markup=main_markup())
+        helping = FSInputFile("loggerbot.jpg")
+        await bot.send_photo(message.chat.id, photo=helping, caption='Лови инструкцию!\n', reply_markup=main_markup())
 
     elif text == "хочу статистику по 1 обучению":
         await bot.send_message(chat_id, 'Что именно ты хочешь получить?', reply_markup=stat_one_markup())
