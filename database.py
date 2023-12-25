@@ -102,3 +102,51 @@ def insert_logs(db, data):
     connection.execute(query_insert_logs)
     connection.commit()
     connection.close()
+
+
+def insert_meme(db, meme_id, url):
+    connection = sqlite3.connect(db)
+    url_begin = "https://drive.google.com/file/d/"
+    url_end = "/view?usp=drive_link"
+    link = "https://drive.google.com/uc?export=view&id=" + url[len(url_begin):-len(url_end)]
+    query_insert_meme = f"INSERT INTO images(id, meme_link) VALUES ({meme_id}, '{link}')"
+    connection.execute(query_insert_meme)
+    connection.commit()
+    connection.close()
+
+
+def delete_meme(db, meme_id):
+    connection = sqlite3.connect(db)
+    query_insert_meme = f"DELETE FROM images WHERE id={meme_id}"
+    connection.execute(query_insert_meme)
+    connection.commit()
+    connection.close()
+
+# добавление мемов
+'''
+if __name__ == "__main__":
+    db_path = "Logs.db"
+    AMVERA_MODE = False
+    if AMVERA_MODE:
+        db_path = "/data/" + db_path
+    database = db_path
+
+    meme_id = 4
+    while True:
+        url = input()
+        insert_meme(database, meme_id, url)
+        meme_id += 1
+'''
+
+# удаление мемов
+'''
+if __name__ == "__main__":
+    db_path = "Logs.db"
+    AMVERA_MODE = False
+    if AMVERA_MODE:
+        db_path = "/data/" + db_path
+    database = db_path
+    while True:
+        id = int(input())
+        delete_meme(database, id)
+'''

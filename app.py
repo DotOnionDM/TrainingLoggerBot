@@ -283,7 +283,7 @@ async def text_handler(message: types.Message):
     chat_id = message.chat.id
 
     if text == "хочу мем":
-        number_meme = random.randint(0, 3)
+        number_meme = random.randint(0, 37)
         meme = db.get_meme(database, number_meme)
         if meme:
             await bot.send_photo(chat_id, meme[0], reply_markup=main_markup())
