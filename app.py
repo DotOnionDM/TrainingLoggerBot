@@ -1,25 +1,23 @@
-import uuid
-import sqlite3
-from sqlite3 import Error
-from contextlib import closing
-from aiogram import Bot, Dispatcher, types, F
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from aiogram.filters import Command
-from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import FSInputFile
 import asyncio
-import database as db
-import tornado
-import tornado.web
-import random
+import datetime
 import json
-import pandas as pd
+import random
+import sqlite3
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import datetime
-from gigachat import GigaChat
+import tornado
+import tornado.web
 import xlsxwriter
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.filters import Command
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import FSInputFile
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from gigachat import GigaChat
+
+import database as db
 
 AMVERA_MODE = False
 if AMVERA_MODE:
@@ -67,7 +65,7 @@ def stat_one_markup():
 
 @dp.message(Command("start", "go"))
 async def start_handler(message: types.Message):
-    user_id = db.find_user_id(database, message.chat.id)
+    user_id = db.get_user_id(database, message.chat.id)
 
     if user_id is None:
         user_id = db.insert_user_id(database, message.chat.id)
@@ -111,19 +109,10 @@ async def all_statistics(message: types.Message):
 @dp.message(F.text.startswith('График обучения: '))
 async def plot_training(message: types.Message):
     text = message.text.lower()
-    text = text[17:]
+    train_id = text[17:]
     chat_id = message.chat.id
 
-    connection = sqlite3.connect(database)
-
-    query_get_info = pd.read_sql_query(f'''
-        SELECT * FROM logs_table
-        WHERE train_id = "{text}"
-        ''', connection)
-
-    data = pd.DataFrame(query_get_info,
-                        columns=['log_id', 'user_id', 'train_id', 'epoch', 'metric_type', 'metric_score', 'time'])
-    connection.close()
+    data = db.get_train_id_logs_statistics(database, train_id)
 
     if data.empty:
         await bot.send_message(chat_id, 'Что-то пошло не так. Может, опечатка в названии модели? Попробуй еще раз!',
@@ -150,34 +139,17 @@ async def plot_training(message: types.Message):
 @dp.message(F.text.startswith('Время до конца обучения: '))
 async def time_training(message: types.Message):
     text = message.text.lower()
-    text = text[25:]
+    train_id = text[25:]
     chat_id = message.chat.id
 
-    connection = sqlite3.connect(database)
-
-    query_get_info = pd.read_sql_query(f'''
-        SELECT * FROM logs_table
-        WHERE train_id = "{text}"
-        ''', connection)
-
-    data = pd.DataFrame(query_get_info,
-                        columns=['log_id', 'user_id', 'train_id', 'epoch', 'metric_type', 'metric_score', 'time'])
-    connection.close()
+    data = db.get_train_id_logs_statistics(database, train_id)
 
     if data.empty:
         await bot.send_message(chat_id, 'Что-то пошло не так. Может, опечатка в названии модели? Попробуй еще раз!',
                                reply_markup=stat_one_markup())
     else:
         data.sort_values(by=['epoch'], ascending=[False])
-        connection = sqlite3.connect(database)
-        query_get_info = pd.read_sql_query(f'''
-            SELECT * FROM status_table
-            WHERE train_id = "{text}"
-            ''', connection)
-        data_status = pd.DataFrame(query_get_info,
-                                   columns=['train_id', 'user_id', 'num_epochs', 'train_status', 'metric_type',
-                                            'time_start', 'time_end'])
-        connection.close()
+        data_status = db.get_train_id_status(database, train_id)
         current_train_status = data_status['train_status'].iloc[0]
 
         if current_train_status == "Finished":
@@ -211,30 +183,12 @@ async def time_training(message: types.Message):
 @dp.message(F.text.startswith('Хочу уведомление о '))
 async def notification_training(message: types.Message):
     text = message.text.lower()
-    text = text[19:]
+    train_id = text[19:]
     chat_id = message.chat.id
 
-    connection = sqlite3.connect(database)
-
-    query_get_info = pd.read_sql_query(f'''
-        SELECT * FROM logs_table
-        WHERE train_id = "{text}"
-        ''', connection)
-
-    data = pd.DataFrame(query_get_info,
-                        columns=['log_id', 'user_id', 'train_id', 'epoch', 'metric_type', 'metric_score', 'time'])
-    connection.close()
-
+    data = db.get_train_id_logs_statistics(database, train_id)
     data.sort_values(by=['epoch'], ascending=[False])
-    connection = sqlite3.connect(database)
-    query_get_info = pd.read_sql_query(f'''
-        SELECT * FROM status_table
-        WHERE train_id = "{text}"
-        ''', connection)
-    data_status = pd.DataFrame(query_get_info,
-                               columns=['train_id', 'user_id', 'num_epochs', 'train_status', 'metric_type',
-                                        'time_start', 'time_end'])
-    connection.close()
+    data_status = db.get_train_id_status(database, train_id)
     current_train_status = data_status['train_status'].iloc[0]
 
     last_log_epoch = data['epoch'].iloc[0]
@@ -260,32 +214,17 @@ async def notification_training(message: types.Message):
 @dp.message(F.text.startswith('Отчет: '))
 async def statistic_training(message: types.Message):
     text = message.text.lower()
-    text = text[7:]
+    train_id = text[7:]
     chat_id = message.chat.id
 
-    connection = sqlite3.connect(database)
-    query_get_info = pd.read_sql_query(f'''
-        SELECT * FROM logs_table
-        WHERE train_id = "{text}"
-        ''', connection)
-    data = pd.DataFrame(query_get_info,
-                        columns=['log_id', 'user_id', 'train_id', 'epoch', 'metric_type', 'metric_score', 'time'])
-    connection.close()
+    data = db.get_train_id_logs_statistics(database, train_id)
 
     if data.empty:
         await bot.send_message(chat_id, 'Что-то пошло не так. Может, опечатка в названии модели? Попробуй еще раз!',
                                reply_markup=stat_one_markup())
     else:
         data.sort_values(by=['epoch'], ascending=[False])
-        connection = sqlite3.connect(database)
-        query_get_info = pd.read_sql_query(f'''
-            SELECT * FROM status_table
-            WHERE train_id = "{text}"
-            ''', connection)
-        data_status = pd.DataFrame(query_get_info,
-                                   columns=['train_id', 'user_id', 'num_epochs', 'train_status', 'metric_type',
-                                            'time_start', 'time_end'])
-        connection.close()
+        data_status = db.get_train_id_status(database, train_id)
         current_train_status = data_status['train_status'].iloc[0]
 
         if current_train_status == "Finished":
@@ -329,7 +268,7 @@ async def statistic_training(message: types.Message):
         plt.savefig('figure.png')
 
         await bot.send_message(chat_id,
-                               f'Итак, отчет об обучении модели "{text}".\n\n' + time + f'\n\nНиже ты найдешь график '
+                               f'Итак, отчет об обучении модели "{train_id}".\n\n' + time + f'\n\nНиже ты найдешь график '
                                                                                         f'зависимости метрики "{metric}" '
                                                                                         f'от эпохи',
                                reply_markup=stat_one_markup())
@@ -345,17 +284,9 @@ async def text_handler(message: types.Message):
 
     if text == "хочу мем":
         number_meme = random.randint(0, 3)
-        connection = sqlite3.connect(database)
-        our_cursor = connection.cursor()
-        query_get_meme = f'''
-        SELECT meme_link FROM images
-        WHERE id = "{number_meme}"
-        '''
-        our_cursor.execute(query_get_meme)
-        result = our_cursor.fetchone()
-        connection.close()
-        if result:
-            await bot.send_photo(chat_id, result[0], reply_markup=main_markup())
+        meme = db.get_meme(database, number_meme)
+        if meme:
+            await bot.send_photo(chat_id, meme[0], reply_markup=main_markup())
 
     elif text == "хочу инструкцию":
         await bot.send_message(chat_id, 'Лови инструкцию!\n', reply_markup=main_markup())
@@ -428,50 +359,21 @@ class MainHandler(tornado.web.RequestHandler):
                     num = int(data["num_epochs"])
                 except TypeError:
                     self.send_error(403)
-                query_insert_train = f'''
-                INSERT INTO status_table(train_id, user_id, num_epochs, train_status, time_start, time_end)
-                VALUES ("{data["train_id"]}", "{data["user_id"]}",
-                {data["num_epochs"]}, "{data["train_status"]}",
-                "{data["time_start"]}", "{data["time_end"]}")
-                '''
-                connection = sqlite3.connect(database)
-                cursor = connection.cursor()
-                cursor.execute(query_insert_train)
-                connection.commit()
-                connection.close()
+                db.insert_train(db, data)
                 self.write("Train created")
             elif (data["type"] == "UPDATE") and (data["what"] == "train_status"):
                 try:
                     num = int(data["num_epochs"])
                 except TypeError:
                     self.send_error(403)
-                query_update_train = f'''
-                UPDATE status_table
-                SET time_end = "{data["time_end"]}", train_status = "{data["train_status"]}"
-                WHERE user_id = "{data["user_id"]}" AND train_id = "{data["train_id"]}"
-                '''
-                connection = sqlite3.connect(database)
-                cursor = connection.cursor()
-                cursor.execute(query_update_train)
-                connection.commit()
-                connection.close()
+                db.update_train(database, data)
                 self.write("Train ended")
             elif (data["type"] == "INSERT") and (data["what"] == "logs_table"):
                 try:
                     num = int(data["epoch"])
                 except TypeError:
                     self.send_error(403)
-                query_insert_log = f'''
-                INSERT INTO logs_table(log_id, user_id, train_id, epoch, metric_type, metric_score, time)
-                VALUES ("{data["log_id"]}", "{data["user_id"]}",
-                "{data["train_id"]}", {data["epoch"]}, "{data["metric_type"]}",
-                {data["metric_score"]}, "{data["time"]}")
-                '''
-                connection = sqlite3.connect(database)
-                cursor = connection.cursor()
-                cursor.execute(query_insert_log)
-                connection.commit()
-                connection.close()
+                db.insert_logs(database, data)
                 self.write("Logs have been added to the database")
             else:
                 self.send_error(status_code=503)
