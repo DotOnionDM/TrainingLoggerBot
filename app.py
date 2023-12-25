@@ -366,7 +366,7 @@ class MainHandler(tornado.web.RequestHandler):
                     num = int(data["num_epochs"])
                 except TypeError:
                     self.send_error(403)
-                db.insert_train(db, data)
+                db.insert_train(database, data)
                 self.write("Train created")
             elif (data["type"] == "UPDATE") and (data["what"] == "train_status"):
                 try:
