@@ -6,3 +6,4 @@ numpy==1.20.3
 matplotlib==3.4.3
 gigachat==0.1.9
 seaborn==0.11.2
+XlsxWriter==3.1.9

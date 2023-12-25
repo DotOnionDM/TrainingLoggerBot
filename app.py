@@ -8,6 +8,7 @@ from aiogram.filters import Command
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import FSInputFile
 import asyncio
+import database as db
 import tornado
 import tornado.web
 import random
@@ -18,6 +19,7 @@ import numpy as np
 import seaborn as sns
 import datetime
 from gigachat import GigaChat
+import xlsxwriter
 
 AMVERA_MODE = False
 if AMVERA_MODE:
@@ -65,30 +67,45 @@ def stat_one_markup():
 
 @dp.message(Command("start", "go"))
 async def start_handler(message: types.Message):
-    print(message.chat.id)
-    connection = sqlite3.connect(database)
-    query_find_user_id = f'''
-    SELECT user_id FROM chat_user_table
-    WHERE chat_id = "{message.chat.id}"
-    '''
-    unique_id = connection.execute(query_find_user_id).fetchone()[0]
-    print(unique_id)
+    user_id = db.find_user_id(database, message.chat.id)
 
-    if unique_id is None:
-        print("if")
-        unique_id = str(uuid.uuid4())
-        query_insert_user_id = f'''
-        INSERT INTO chat_user_table(chat_id, user_id)
-        VALUES ("{message.chat.id}", "{unique_id}")
-        '''
-        connection.execute(query_insert_user_id)
-        connection.commit()
+    if user_id is None:
+        user_id = db.insert_user_id(database, message.chat.id)
 
-    connection.close()
     await bot.send_message(message.chat.id,
                            f"Привет, {message.chat.first_name}! Я бот - логгер процесса обучения нейросетей. "
-                           f"Тебе присвоен уникальный id: {unique_id}.",
+                           f"Тебе присвоен уникальный id: {user_id[0]}.",
                            reply_markup=main_markup())
+
+
+@dp.message(F.text.startswith('ID: '))
+async def all_statistics(message: types.Message):
+    text = message.text.lower()
+    user_id = text[len("ID: "):]
+
+    data = db.get_user_id_statistics(database, user_id)
+
+    if not data:
+        return await bot.send_message(chat_id=message.chat.id,
+                                      text="По этому id нет данных об обучении!",
+                                      reply_markup=main_markup())
+
+    title = ['log_id', 'user_id', 'train_id', 'epoch', 'metric_type', 'metric_score', 'time']
+    file_name = f'all_statistics_{user_id}.xlsx'
+
+    workbook = xlsxwriter.Workbook(file_name)
+    worksheet = workbook.add_worksheet()
+    worksheet.write_row(0, 0, title)
+
+    for row in range(0, len(data)):
+        worksheet.write_row(row + 1, 0, data[row])
+
+    workbook.close()
+
+    file = FSInputFile(file_name)
+    await bot.send_document(chat_id=message.chat.id,
+                            document=file,
+                            caption="Держи файл с данными о всех обучениях!")
 
 
 @dp.message(F.text.startswith('График обучения: '))
@@ -347,9 +364,9 @@ async def text_handler(message: types.Message):
         await bot.send_message(chat_id, 'Что именно ты хочешь получить?', reply_markup=stat_one_markup())
 
     elif text == "хочу статистику по всем обучениям":
-        # магия
-
-        await bot.send_message(chat_id, 'Держи табличку со всеми своими обучениями', reply_markup=main_markup())
+        await bot.send_message(chat_id, 'Пожалуйста, отправь свой уникальный id, который был присвоен в начале '
+                                        'работы с ботом, в формате "ID: user_id" без кавычек, '
+                                        'где user_id – твой уникальный код', reply_markup=main_markup())
 
     elif text == "хочу только график обучения":
         await bot.send_message(chat_id,
