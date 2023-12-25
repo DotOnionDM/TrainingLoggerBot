@@ -19,7 +19,7 @@ from gigachat import GigaChat
 
 import database as db
 
-AMVERA_MODE = False
+AMVERA_MODE = True
 if AMVERA_MODE:
     path = "/data/config.dat"
     db_path = "/data/Logs.db"
