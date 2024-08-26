@@ -19,7 +19,7 @@ from gigachat import GigaChat
 
 import database as db
 
-AMVERA_MODE = True
+AMVERA_MODE = False
 if AMVERA_MODE:
     path = "/data/config.dat"
     db_path = "/data/Logs.db"
@@ -94,7 +94,8 @@ async def all_statistics(message: types.Message):
                                       text="По этому id нет данных об обучении!",
                                       reply_markup=main_markup())
 
-    title = ['log_id', 'user_id', 'train_id', 'epoch', 'metric_type', 'metric_score', 'time']
+    title = ['log_id', 'user_id', 'train_id', 'epoch',
+             'metric_type', 'metric_score', 'time']
     file_name = f'all_statistics_{user_id}.xlsx'
 
     workbook = xlsxwriter.Workbook(file_name)
@@ -135,7 +136,8 @@ async def plot_training(message: types.Message):
         plt.xlabel("Эпоха", fontsize=15)
         ylabel = "\nЗначение " + data['metric_type'][0] + "\n"
         plt.ylabel(ylabel, fontsize=15)
-        plt.xticks(np.arange(min(data['epoch'].to_numpy()), max(data['epoch'].to_numpy()) + 1, 1))
+        plt.xticks(np.arange(min(data['epoch'].to_numpy()), max(
+            data['epoch'].to_numpy()) + 1, 1))
         plt.savefig('figure.png')
         await bot.send_message(chat_id, 'Лови!', reply_markup=stat_one_markup())
         figure = FSInputFile("figure.png")
@@ -167,15 +169,19 @@ async def time_training(message: types.Message):
             num_epoch = data_status['num_epochs'].iloc[0]
             start_time = data_status['time_start'].iloc[0]
 
-            datetime_last_log_time = datetime.datetime.strptime(last_log_time[:-7], '%Y-%m-%d %H:%M:%S')
-            datetime_start_time = datetime.datetime.strptime(start_time[:-7], '%Y-%m-%d %H:%M:%S')
-            time_spent = (datetime_last_log_time - datetime_start_time).total_seconds()
+            datetime_last_log_time = datetime.datetime.strptime(
+                last_log_time[:-7], '%Y-%m-%d %H:%M:%S')
+            datetime_start_time = datetime.datetime.strptime(
+                start_time[:-7], '%Y-%m-%d %H:%M:%S')
+            time_spent = (datetime_last_log_time -
+                          datetime_start_time).total_seconds()
             average_time_epoch = time_spent / last_log_epoch
             epochs_left = num_epoch - last_log_epoch
             calculated_time_end = average_time_epoch * epochs_left
             calc_hours = calculated_time_end // 3600
             calc_minutes = (calculated_time_end - calc_hours * 3600) // 60
-            calc_seconds = (calculated_time_end - calc_hours * 3600 - calc_minutes * 60)
+            calc_seconds = (calculated_time_end -
+                            calc_hours * 3600 - calc_minutes * 60)
 
             await bot.send_message(chat_id,
                                    f'До конца обучения осталось приблизительно "{calc_hours}" часов, '
@@ -202,8 +208,10 @@ async def notification_training(message: types.Message):
     num_epoch = data_status['num_epochs'].iloc[0]
     start_time = data_status['time_start'].iloc[0]
 
-    datetime_last_log_time = datetime.datetime.strptime(last_log_time[:-7], '%Y-%m-%d %H:%M:%S')
-    datetime_start_time = datetime.datetime.strptime(start_time[:-7], '%Y-%m-%d %H:%M:%S')
+    datetime_last_log_time = datetime.datetime.strptime(
+        last_log_time[:-7], '%Y-%m-%d %H:%M:%S')
+    datetime_start_time = datetime.datetime.strptime(
+        start_time[:-7], '%Y-%m-%d %H:%M:%S')
     time_spent = (datetime_last_log_time - datetime_start_time).total_seconds()
     average_time_epoch = time_spent / last_log_epoch
     epochs_left = num_epoch - last_log_epoch
@@ -242,15 +250,19 @@ async def statistic_training(message: types.Message):
             num_epoch = data_status['num_epochs'].iloc[0]
             start_time = data_status['time_start'].iloc[0]
 
-            datetime_last_log_time = datetime.datetime.strptime(last_log_time[:-7], '%Y-%m-%d %H:%M:%S')
-            datetime_start_time = datetime.datetime.strptime(start_time[:-7], '%Y-%m-%d %H:%M:%S')
-            time_spent = (datetime_last_log_time - datetime_start_time).total_seconds()
+            datetime_last_log_time = datetime.datetime.strptime(
+                last_log_time[:-7], '%Y-%m-%d %H:%M:%S')
+            datetime_start_time = datetime.datetime.strptime(
+                start_time[:-7], '%Y-%m-%d %H:%M:%S')
+            time_spent = (datetime_last_log_time -
+                          datetime_start_time).total_seconds()
             average_time_epoch = time_spent / last_log_epoch
             epochs_left = num_epoch - last_log_epoch
             calculated_time_end = average_time_epoch * epochs_left
             calc_hours = calculated_time_end // 3600
             calc_minutes = (calculated_time_end - calc_hours * 3600) // 60
-            calc_seconds = (calculated_time_end - calc_hours * 3600 - calc_minutes * 60)
+            calc_seconds = (calculated_time_end -
+                            calc_hours * 3600 - calc_minutes * 60)
 
             time = (f'Пройдено "{last_log_epoch}" эпох из "{num_epoch}", осталось "{epochs_left}" эпох. До конца '
                     f'обучения осталось приблизительно "{calc_hours}" часов, "{calc_minutes}" минут, "{calc_seconds}" '
@@ -270,13 +282,15 @@ async def statistic_training(message: types.Message):
         plt.xlabel("Эпоха", fontsize=15)
         ylabel = "\nЗначение " + metric + "\n"
         plt.ylabel(ylabel, fontsize=15)
-        plt.xticks(np.arange(min(data['epoch'].to_numpy()), max(data['epoch'].to_numpy()) + 1, 1))
+        plt.xticks(np.arange(min(data['epoch'].to_numpy()), max(
+            data['epoch'].to_numpy()) + 1, 1))
         plt.savefig('figure.png')
 
         await bot.send_message(chat_id,
-                               f'Итак, отчет об обучении модели "{train_id}".\n\n' + time + f'\n\nНиже ты найдешь график '
-                                                                                        f'зависимости метрики "{metric}" '
-                                                                                        f'от эпохи',
+                               f'Итак, отчет об обучении модели "{train_id}".\n\n' +
+                               time + f'\n\nНиже ты найдешь график '
+                               f'зависимости метрики "{metric}" '
+                               f'от эпохи',
                                reply_markup=stat_one_markup())
         await asyncio.sleep(1)
         figure = FSInputFile("figure.png")
